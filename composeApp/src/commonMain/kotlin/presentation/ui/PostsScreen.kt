@@ -65,7 +65,7 @@ fun PostsScreen(viewModel: PostsViewModel) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Create New Post",
+                        text = "Crear nuevo Post",
                         style = MaterialTheme.typography.h6
                     )
 
@@ -79,21 +79,21 @@ fun PostsScreen(viewModel: PostsViewModel) {
                     OutlinedTextField(
                         value = state.title,
                         onValueChange = { viewModel.onEvent(PostsEvent.UpdateTitle(it)) },
-                        label = { Text("Title") },
+                        label = { Text("Titulo") },
                         modifier = Modifier.fillMaxWidth()
                     )
 
                     OutlinedTextField(
                         value = state.body,
                         onValueChange = { viewModel.onEvent(PostsEvent.UpdateBody(it)) },
-                        label = { Text("Body") },
+                        label = { Text("Descripcion") },
                         modifier = Modifier.fillMaxWidth()
                     )
 
                     OutlinedTextField(
                         value = state.userId,
                         onValueChange = { viewModel.onEvent(PostsEvent.UpdateUserId(it)) },
-                        label = { Text("User ID") },
+                        label = { Text("Id usuario") },
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -105,7 +105,7 @@ fun PostsScreen(viewModel: PostsViewModel) {
                             onClick = { viewModel.onEvent(PostsEvent.ClearForm) },
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
-                            Text("Clear")
+                            Text("Limpiar")
                         }
 
                         Button(
@@ -118,7 +118,7 @@ fun PostsScreen(viewModel: PostsViewModel) {
                                     color = Color.White
                                 )
                             } else {
-                                Text("Create Post")
+                                Text("Crear Post")
                             }
                         }
                     }
@@ -184,7 +184,7 @@ fun PostItem(post: Post) {
                     style = MaterialTheme.typography.caption
                 )
                 Text(
-                    text = "User ID: ${post.userId}",
+                    text = "ID de usuario: ${post.userId}",
                     style = MaterialTheme.typography.caption
                 )
             }
