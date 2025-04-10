@@ -16,31 +16,34 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import data.model.Post
 import presentation.viewmodel.PostsEvent
+import presentation.viewmodel.PostsState
 import presentation.viewmodel.PostsViewModel
-import util.NetworkError
+
 
 @Composable
 fun PostsScreen(viewModel: PostsViewModel) {
     val state = viewModel.state
+    val showModal = remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = true) {
         viewModel.onEvent(PostsEvent.LoadPosts)
     }
 
-    MaterialTheme {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -50,79 +53,19 @@ fun PostsScreen(viewModel: PostsViewModel) {
             Text(
                 text = "Posts App",
                 style = MaterialTheme.typography.h5,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
 
-            // Form for creating a new post
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = 4.dp
+            Button(
+                onClick = { showModal.value = true },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Crear nuevo Post",
-                        style = MaterialTheme.typography.h6
-                    )
+                Text("Crear nuevo Post")
+            }
 
-                    OutlinedTextField(
-                        value = state.id,
-                        onValueChange = { viewModel.onEvent(PostsEvent.UpdateId(it)) },
-                        label = { Text("ID") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = state.title,
-                        onValueChange = { viewModel.onEvent(PostsEvent.UpdateTitle(it)) },
-                        label = { Text("Titulo") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = state.body,
-                        onValueChange = { viewModel.onEvent(PostsEvent.UpdateBody(it)) },
-                        label = { Text("Descripcion") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = state.userId,
-                        onValueChange = { viewModel.onEvent(PostsEvent.UpdateUserId(it)) },
-                        label = { Text("Id usuario") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Button(
-                            onClick = { viewModel.onEvent(PostsEvent.ClearForm) },
-                            modifier = Modifier.padding(end = 8.dp)
-                        ) {
-                            Text("Limpiar")
-                        }
-
-                        Button(
-                            onClick = { viewModel.onEvent(PostsEvent.CreatePost) }
-                        ) {
-                            if (state.isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    strokeWidth = 2.dp,
-                                    color = Color.White
-                                )
-                            } else {
-                                Text("Crear Post")
-                            }
-                        }
-                    }
-                }
+            // Mostrar el modal cuando showModal sea true
+            if (showModal.value) {
+                PostCreateDialog(viewModel, state, onDismiss = { showModal.value = false })
             }
 
             // Error message
@@ -136,6 +79,11 @@ fun PostsScreen(viewModel: PostsViewModel) {
                 }
             }
 
+            Text(
+                text = "Posts",
+                style = MaterialTheme.typography.h6,
+            )
+
             // Loading indicator for posts list
             if (state.isLoading && state.posts.isEmpty()) {
                 Box(
@@ -146,11 +94,6 @@ fun PostsScreen(viewModel: PostsViewModel) {
                 }
             }
 
-            // List of posts
-            Text(
-                text = "Posts",
-                style = MaterialTheme.typography.h6
-            )
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
@@ -158,6 +101,82 @@ fun PostsScreen(viewModel: PostsViewModel) {
             ) {
                 items(state.posts) { post ->
                     PostItem(post = post)
+                }
+            }
+        }
+
+}
+
+@Composable
+fun PostCreateDialog(viewModel: PostsViewModel, state: PostsState, onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = 4.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Crear nuevo Post",
+                    style = MaterialTheme.typography.h6
+                )
+
+                OutlinedTextField(
+                    value = state.id,
+                    onValueChange = { viewModel.onEvent(PostsEvent.UpdateId(it)) },
+                    label = { Text("ID") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = state.title,
+                    onValueChange = { viewModel.onEvent(PostsEvent.UpdateTitle(it)) },
+                    label = { Text("Titulo") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = state.body,
+                    onValueChange = { viewModel.onEvent(PostsEvent.UpdateBody(it)) },
+                    label = { Text("Descripcion") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = state.userId,
+                    onValueChange = { viewModel.onEvent(PostsEvent.UpdateUserId(it)) },
+                    label = { Text("Id usuario") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(
+                        onClick = { viewModel.onEvent(PostsEvent.ClearForm) },
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text("Limpiar")
+                    }
+
+                    Button(
+                        onClick = { viewModel.onEvent(PostsEvent.CreatePost) }
+                    ) {
+                        if (state.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                                color = Color.White
+                            )
+                        } else {
+                            Text("Crear Post")
+                        }
+                    }
                 }
             }
         }
@@ -181,11 +200,11 @@ fun PostItem(post: Post) {
             ) {
                 Text(
                     text = "ID: ${post.id}",
-                    style = MaterialTheme.typography.caption
+                    style = MaterialTheme.typography.caption,
                 )
                 Text(
                     text = "ID de usuario: ${post.userId}",
-                    style = MaterialTheme.typography.caption
+                    style = MaterialTheme.typography.caption,
                 )
             }
 
@@ -194,14 +213,14 @@ fun PostItem(post: Post) {
             Text(
                 text = post.title,
                 style = MaterialTheme.typography.subtitle1,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = post.body,
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.body2,
             )
         }
     }
